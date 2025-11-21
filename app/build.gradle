@@ -1,0 +1,78 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Load local.properties
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
+
+android {
+    namespace 'com.rog3rb0t.touchgame'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.rog3rb0t.touchgame"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        // Load AdMob IDs from local.properties
+        manifestPlaceholders = [
+            ADMOB_APP_ID: localProperties.getProperty('ADMOB_APP_ID', 'ca-app-pub-3940256099942544~3347511713')
+        ]
+        
+        buildConfigField "String", "ADMOB_BANNER_AD_UNIT_ID", "\"${localProperties.getProperty('ADMOB_BANNER_AD_UNIT_ID', 'ca-app-pub-3940256099942544/6300978111')}\""
+        buildConfigField "String", "ADMOB_INTERSTITIAL_AD_UNIT_ID", "\"${localProperties.getProperty('ADMOB_INTERSTITIAL_AD_UNIT_ID', 'ca-app-pub-3940256099942544/1033173712')}\""
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+            }
+        }
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(System.getProperty("user.home") + "/touchgame-release-key.jks")
+            storePassword "android123"
+            keyAlias "touchgame"
+            keyPassword "android123"
+        }
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    
+    buildFeatures {
+        buildConfig = true
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.18.1"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
+    ndkVersion "25.1.8937393"
+}
+
+dependencies {
+    implementation 'com.google.android.gms:play-services-ads:22.6.0'
+    implementation 'androidx.annotation:annotation:1.7.0'
+}

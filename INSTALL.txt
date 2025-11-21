@@ -1,0 +1,76 @@
+========================================
+   TOUCHGAME - INSTALLATION GUIDE
+========================================
+
+QUICK START FOR PHYSICAL PHONES:
+--------------------------------
+
+The app is READY TO INSTALL on your physical Android phone!
+
+APK FILE: TouchGame-v1.0-signed.apk (2.9 MB)
+
+
+INSTALLATION STEPS:
+-------------------
+
+1. Copy "TouchGame-v1.0-signed.apk" to your phone
+   (via USB cable, email, Google Drive, WhatsApp, etc.)
+
+2. On your phone:
+   - Open Settings → Security
+   - Enable "Install from Unknown Sources" or "Install Unknown Apps"
+   
+3. Use your phone's file manager to find the APK file
+
+4. Tap the APK file and follow the installation prompts
+
+5. The app icon will appear in your app drawer!
+
+
+USING ADB (ALTERNATIVE METHOD):
+-------------------------------
+
+If you have USB debugging enabled:
+
+1. Connect phone to computer via USB
+2. Run: adb install -r TouchGame-v1.0-signed.apk
+3. Done!
+
+
+APP INFORMATION:
+----------------
+- Package: com.rog3rb0t.touchgame
+- Version: 1.0
+- Size: 2.9 MB
+- Requirements: Android 7.0 (API 24) or higher
+- Permissions: Internet access (for ads)
+
+
+SIGNING DETAILS:
+----------------
+The APK is signed with a release keystore:
+- Keystore: ~/touchgame-release-key.jks
+- Alias: touchgame
+- Password: android123
+
+Keep this keystore safe if you plan to update the app later!
+
+
+IMPORTANT NOTES:
+----------------
+- The app uses TEST ad IDs from Google AdMob
+- For production, you need to replace them with your own ad IDs
+- See DEPLOYMENT.md for complete details
+
+
+TROUBLESHOOTING:
+----------------
+- If installation fails, make sure "Unknown Sources" is enabled
+- Check that your Android version is 7.0 or higher
+- Try uninstalling any old version first
+- Make sure you have at least 10 MB free space
+
+
+========================================
+Enjoy playing TouchGame!
+========================================
