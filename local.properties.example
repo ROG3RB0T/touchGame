@@ -1,5 +1,8 @@
 # AdMob Configuration
 # Copy this file to local.properties and add your own AdMob IDs
-ADMOB_APP_ID=ca-app-pub-3144400218741849~8404321396
-ADMOB_BANNER_AD_UNIT_ID=ca-app-pub-3144400218741849/8293189496
-ADMOB_INTERSTITIAL_AD_UNIT_ID=ca-app-pub-3144400218741849/3790288967
+# The IDs below are Google's test ad unit IDs for development/testing
+
+# Test AdMob IDs (replace with your production IDs in local.properties)
+ADMOB_APP_ID=ca-app-pub-3940256099942544~3347511713
+ADMOB_BANNER_AD_UNIT_ID=ca-app-pub-3940256099942544/6300978111
+ADMOB_INTERSTITIAL_AD_UNIT_ID=ca-app-pub-3940256099942544/1033173712
