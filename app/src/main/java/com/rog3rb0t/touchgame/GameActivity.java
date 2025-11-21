@@ -8,6 +8,7 @@ import android.widget.LinearLayout;
 import android.widget.Button;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.Color;
 import com.google.android.gms.ads.MobileAds;
@@ -19,26 +20,26 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.RequestConfiguration;
 import androidx.annotation.NonNull;
-import java.util.Random;
+import java.util.Arrays;
 
 public class GameActivity extends Activity {
     private GameView gameView;
     private TextView scoreText;
     private TextView roundText;
-    private Button resetButton;
-    private Button exitButton;
     private LinearLayout layout;
     private InterstitialAd interstitialAd;
     private AdView bannerAdView;
-    private Random random = new Random();
-    private boolean firstLevelCompleted = false;
-    private long lastAdTime = 0;
-    private long nextAdDelay = 0; // milliseconds until next ad
+    private int lastAdRound = 0; // Track the last round an ad was shown
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Keep screen on during gameplay
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Create layout programmatically
         layout = new LinearLayout(this);
@@ -72,48 +73,6 @@ public class GameActivity extends Activity {
         );
         gameView.setLayoutParams(gameParams);
         
-        // Reset button at bottom
-        resetButton = new Button(this);
-        resetButton.setText("🔄 Reset Game");
-        resetButton.setTextColor(0xFFFFFFFF);
-        resetButton.setTextSize(16);
-        resetButton.setBackgroundResource(R.drawable.button_reset);
-        resetButton.setAllCaps(false);
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                gameView.resetGame();
-                updateScore(0, 1);
-                updateGradient();
-            }
-        });
-        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        buttonParams.setMargins(20, 10, 20, 10);
-        resetButton.setLayoutParams(buttonParams);
-        
-        // Exit button
-        exitButton = new Button(this);
-        exitButton.setText("✖ Exit");
-        exitButton.setTextColor(0xFFFFFFFF);
-        exitButton.setTextSize(16);
-        exitButton.setBackgroundResource(R.drawable.button_exit);
-        exitButton.setAllCaps(false);
-        exitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        LinearLayout.LayoutParams exitParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        exitParams.setMargins(20, 0, 20, 20);
-        exitButton.setLayoutParams(exitParams);
-        
         // Banner ad at the bottom
         bannerAdView = new AdView(this);
         bannerAdView.setAdSize(AdSize.BANNER);
@@ -127,8 +86,6 @@ public class GameActivity extends Activity {
         
         layout.addView(infoLayout);
         layout.addView(gameView);
-        layout.addView(resetButton);
-        layout.addView(exitButton);
         layout.addView(bannerAdView);
         
         setContentView(layout);
@@ -138,10 +95,6 @@ public class GameActivity extends Activity {
             loadInterstitialAd();
             loadBannerAd();
         });
-        
-        // Set initial random ad delay (10-60 seconds in milliseconds)
-        nextAdDelay = (10 + random.nextInt(51)) * 1000L; // 10-60 seconds
-        lastAdTime = System.currentTimeMillis();
         
         // Set initial gradient after a short delay to ensure native side is ready
         gameView.postDelayed(new Runnable() {
@@ -157,6 +110,7 @@ public class GameActivity extends Activity {
             "Score = 10 + round number\n" +
             "Circle gets smaller and faster each round!", 
             Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 120);
         toast.show();
         
         // Keep showing the toast for 10 seconds
@@ -224,22 +178,10 @@ public class GameActivity extends Activity {
         roundText.setText("Round: " + round);
         updateGradient();
         
-        // After completing first level, enable time-based ads
-        if (round > 1) {
-            firstLevelCompleted = true;
-        }
-        
-        // Check if enough time has passed since last ad
-        if (firstLevelCompleted) {
-            long currentTime = System.currentTimeMillis();
-            long timeSinceLastAd = currentTime - lastAdTime;
-            
-            if (timeSinceLastAd >= nextAdDelay) {
-                showInterstitialAd();
-                lastAdTime = currentTime;
-                // Set next random delay (10-60 seconds)
-                nextAdDelay = (10 + random.nextInt(51)) * 1000L;
-            }
+        // Show interstitial ad every 5 levels
+        if (round > 1 && round % 5 == 0 && round != lastAdRound) {
+            showInterstitialAd();
+            lastAdRound = round;
         }
     }
     
@@ -308,12 +250,34 @@ public class GameActivity extends Activity {
     }
     
     private void loadBannerAd() {
+        // Add test device configuration for testing
+        RequestConfiguration requestConfiguration = new RequestConfiguration.Builder()
+            .setTestDeviceIds(Arrays.asList(AdRequest.DEVICE_ID_EMULATOR))
+            .build();
+        MobileAds.setRequestConfiguration(requestConfiguration);
+        
         AdRequest adRequest = new AdRequest.Builder().build();
         bannerAdView.loadAd(adRequest);
+        
+        // Add listener to debug ad loading
+        bannerAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                android.util.Log.d("TouchGame", "Banner ad loaded successfully");
+            }
+            
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                android.util.Log.e("TouchGame", "Banner ad failed to load: " + 
+                    loadAdError.getMessage() + " (Code: " + loadAdError.getCode() + ")");
+            }
+        });
     }
 
     public void showGameOver() {
-        Toast.makeText(this, "Game Over! You reached 25 points!", Toast.LENGTH_LONG).show();
+        Toast toast = Toast.makeText(this, "Game Over! You reached 25 points!", Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 120);
+        toast.show();
     }
 
     @Override

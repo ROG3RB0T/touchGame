@@ -6,6 +6,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.MotionEvent;
 import android.view.HapticFeedbackConstants;
+import android.view.Gravity;
 import android.widget.Toast;
 import android.util.Log;
 
@@ -123,7 +124,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                Toast toast = Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 120);
+                toast.show();
             }
         });
     }
